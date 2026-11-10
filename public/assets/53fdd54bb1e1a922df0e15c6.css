@@ -1,0 +1,12 @@
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: url("/assets/28bde37422b844a7b7a1ccb4.ttf") format('truetype');
+}
+@font-face {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 700;
+  src: url("/assets/ee9004034e125f84930b2ff7.ttf") format('truetype');
+}

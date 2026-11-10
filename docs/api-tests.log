@@ -1,0 +1,75 @@
+PASS Homepage and local source theme
+PASS Recovered catalog: 1045 products and 56 Vans
+PASS Search, sorting, pagination and original cards
+PASS Empty cart and persistent session
+PASS Cart adds, authoritative price, changes and updates
+PASS Invalid variant, out-of-stock and invalid quantity
+PASS Cart session isolation
+PASS Cross-origin mutation rejection
+PASS Registration, hash, session rotation, cart retention
+PASS Logout, incorrect/correct login and duplicate email
+PASS Newsletter independent persistence
+PASS Unconfigured provider APIs are explicit
+PASS Remove last cart item
+PASS Source 404 paths and path traversal
+{
+  "passed": 14,
+  "results": [
+    {
+      "name": "Homepage and local source theme",
+      "passed": true
+    },
+    {
+      "name": "Recovered catalog: 1045 products and 56 Vans",
+      "passed": true
+    },
+    {
+      "name": "Search, sorting, pagination and original cards",
+      "passed": true
+    },
+    {
+      "name": "Empty cart and persistent session",
+      "passed": true
+    },
+    {
+      "name": "Cart adds, authoritative price, changes and updates",
+      "passed": true
+    },
+    {
+      "name": "Invalid variant, out-of-stock and invalid quantity",
+      "passed": true
+    },
+    {
+      "name": "Cart session isolation",
+      "passed": true
+    },
+    {
+      "name": "Cross-origin mutation rejection",
+      "passed": true
+    },
+    {
+      "name": "Registration, hash, session rotation, cart retention",
+      "passed": true
+    },
+    {
+      "name": "Logout, incorrect/correct login and duplicate email",
+      "passed": true
+    },
+    {
+      "name": "Newsletter independent persistence",
+      "passed": true
+    },
+    {
+      "name": "Unconfigured provider APIs are explicit",
+      "passed": true
+    },
+    {
+      "name": "Remove last cart item",
+      "passed": true
+    },
+    {
+      "name": "Source 404 paths and path traversal",
+      "passed": true
+    }
+  ]
+}
