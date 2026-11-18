@@ -1,3 +1,4 @@
 data/runtime.sqlite*
 .env
 node_modules/
+data/uploads/

@@ -49,3 +49,15 @@ POST `/api/recover`, `/api/orders`, `/api/integration-disabled` trả 424 và n�
 Để hoàn thiện phần còn thiếu cần: ảnh/video hoặc quyền quan sát hợp lệ của checkout, giỏ hàng có hàng, trang tài khoản/đơn hàng; hợp đồng API và thông tin cấu hình nhà cung cấp email, đơn hàng, vận chuyển, thanh toán. Không gửi khóa bí mật trong mã nguồn hoặc báo cáo.
 
 Logo, ảnh, font và nội dung giữ nguồn công khai đã khảo sát; việc truy cập công khai không chứng minh quyền cấp phép tái xuất bản. Cần xác nhận quyền sử dụng của chủ sở hữu trước khi phát hành thương mại.
+
+## Đánh giá sản phẩm (Sprint 2)
+
+Khách hàng đã đăng nhập gửi đánh giá (1–5 sao, nội dung 10–1000 ký tự, tối đa 3 ảnh JPG/PNG/WebP, mỗi ảnh ≤ 2 MB) ngay trên trang `/products/{handle}`; trang hiển thị điểm trung bình, biểu đồ tỷ lệ sao và danh sách đánh giá (5 đánh giá mỗi trang). Mỗi tài khoản đánh giá một lần cho mỗi sản phẩm. Quản trị viên ẩn, hiện hoặc xóa đánh giá tại `/admin/reviews`.
+
+- `reviews.mjs`: lược đồ CSDL (`reviews`, `review_images`), API, kiểm duyệt, phục vụ ảnh. `server.mjs` chỉ gọi `initReviews` và `handleReviews`.
+- `public/reviews.js`: giao diện trên trang sản phẩm, được `replica-client.js` nạp tự động. `public/admin/reviews.html`: trang kiểm duyệt.
+- `tests/reviews.mjs`: kiểm thử TC01–TC04 và các trường hợp bảo mật (`npm run test:reviews`; `npm test` chạy cả hai bộ).
+
+**Cấu hình quản trị viên:** đặt `ADMIN_EMAILS=email1,email2` (xem `.env.example`) rồi dùng `node --env-file=.env server.mjs`. Email phải là tài khoản đã đăng ký ở `/account/register`. Không có quản trị viên mặc định. Ảnh lưu ở `data/uploads/reviews/` (đổi bằng `REVIEW_UPLOAD_DIR`); thư mục này nằm trong `.gitignore`.
+
+API: GET `/api/reviews?handle=...&page=1` (công khai); POST `/api/reviews` (cần đăng nhập; JSON `{handle,rating,content,images:[dataURL]}`); GET/POST `/api/admin/reviews` (cần quản trị viên; POST `{id,action:hide|show|delete}`). Mọi kiểm tra hợp lệ (số sao, độ dài, định dạng ảnh theo chữ ký byte, dung lượng, trùng đánh giá, quyền quản trị) thực hiện ở máy chủ bằng truy vấn tham số hóa; nội dung người dùng được escape khi hiển thị.
