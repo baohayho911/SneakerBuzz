@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Kiểm duyệt đánh giá – Sneaker Buzz</title>
+<style>
+  :root{--bg:#f6f6f6;--card:#fff;--text:#222;--muted:#777;--line:#e3e3e3;--accent:#222;--danger:#b00020;--ok:#1b7f3b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{background:var(--accent);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  header h1{font-size:18px;margin:0}
+  header a{color:#fff}
+  main{max-width:960px;margin:20px auto;padding:0 14px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+  button,select{font:inherit;padding:6px 12px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  button.danger{color:var(--danger);border-color:var(--danger)}
+  button[disabled]{opacity:.5;cursor:default}
+  .item{background:var(--card);border:1px solid var(--line);padding:14px;margin-bottom:12px}
+  .item.hidden-review{background:#f0f0f0}
+  .row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px}
+  .star{color:#f5a623;letter-spacing:2px}
+  .muted{color:var(--muted);font-size:13px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;background:#e8f5ec;color:var(--ok)}
+  .tag.off{background:#eee;color:var(--muted)}
+  .text{white-space:pre-wrap;word-break:break-word;margin:8px 0}
+  .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+  .thumbs img{width:84px;height:84px;object-fit:cover;border:1px solid var(--line)}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  #msg{margin:10px 0}
+  .error{color:var(--danger)}
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#161616;--card:#222;--text:#eee;--muted:#aaa;--line:#3a3a3a;--accent:#000;--danger:#ff6b81;--ok:#6fd48e}
+    .item.hidden-review{background:#1b1b1b}
+    .tag{background:#1f3a29}.tag.off{background:#333}
+    button{color:var(--text)}button.primary{color:#fff;background:#444;border-color:#444}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Kiểm duyệt đánh giá sản phẩm</h1>
+  <a href="/">← Về trang chủ</a>
+</header>
+<main>
+  <div class="bar">
+    <label for="status">Hiển thị:</label>
+    <select id="status">
+      <option value="all">Tất cả</option>
+      <option value="visible">Đang hiển thị</option>
+      <option value="hidden">Đã ẩn</option>
+    </select>
+    <span id="total" class="muted"></span>
+  </div>
+  <div id="msg" role="status"></div>
+  <div id="list"></div>
+  <div class="bar"><button id="more" hidden>Xem thêm</button></div>
+</main>
+<script>
+(() => {
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  const $ = id => document.getElementById(id);
+  const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+  let page = 0, pages = 1;
+
+  async function call(url, data) {
+    const r = await fetch(url, data === undefined ? {} : {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+    const b = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(b.message || 'Yêu cầu không thành công.'), {status: r.status});
+    return b;
+  }
+
+  function fail(e) {
+    $('msg').className = 'error';
+    $('msg').innerHTML = e.status === 401
+      ? 'Vui lòng <a href="/account/login">đăng nhập</a> bằng tài khoản quản trị rồi tải lại trang này.'
+      : esc(e.message);
+  }
+
+  function itemHtml(r) {
+    const hiddenNow = r.status === 'hidden';
+    const imgs = r.images.length ? '<div class="thumbs">' + r.images.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Ảnh đánh giá"></a>`).join('') + '</div>' : '';
+    return `<article class="item ${hiddenNow ? 'hidden-review' : ''}" data-id="${esc(r.id)}">
+      <div class="row"><div><strong>${esc(r.author_name)}</strong> <span class="muted">(${esc(r.email)})</span> <span class="star">${stars(r.rating)}</span></div>
+      <span class="tag ${hiddenNow ? 'off' : ''}">${hiddenNow ? 'Đã ẩn' : 'Đang hiển thị'}</span></div>
+      <div class="muted">${esc(new Date(r.created_at).toLocaleString('vi-VN'))} · <a href="/products/${encodeURIComponent(r.product_handle)}" target="_blank" rel="noopener">${esc(r.product_title)}</a></div>
+      <p class="text">${esc(r.content)}</p>${imgs}
+      <div class="actions">
+        <button data-act="${hiddenNow ? 'show' : 'hide'}">${hiddenNow ? 'Hiện lại' : 'Ẩn đánh giá'}</button>
+        <button class="danger" data-act="delete">Xóa vĩnh viễn</button>
+      </div></article>`;
+  }
+
+  async function load(reset) {
+    if (reset) { page = 0; $('list').innerHTML = ''; }
+    $('msg').textContent = ''; $('msg').className = '';
+    try {
+      const d = await call(`/api/admin/reviews?status=${$('status').value}&page=${page + 1}`);
+      page = d.page; pages = d.pages;
+      $('total').textContent = d.total + ' đánh giá';
+      $('list').insertAdjacentHTML('beforeend', d.reviews.map(itemHtml).join(''));
+      if (!d.total) $('msg').textContent = 'Chưa có đánh giá nào.';
+      $('more').hidden = page >= pages;
+    } catch (e) { fail(e); }
+  }
+
+  $('status').addEventListener('change', () => load(true));
+  $('more').addEventListener('click', () => load(false));
+  $('list').addEventListener('click', async e => {
+    const btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    const item = btn.closest('.item'), action = btn.dataset.act;
+    if (action === 'delete' && !confirm('Xóa vĩnh viễn đánh giá này và ảnh đính kèm? Không thể hoàn tác.')) return;
+    btn.disabled = true;
+    try {
+      await call('/api/admin/reviews', {id: item.dataset.id, action});
+      await load(true);
+    } catch (x) { btn.disabled = false; fail(x); }
+  });
+  load(true);
+})();
+</script>
+</body>
+</html>
