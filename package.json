@@ -1,1 +1,17 @@
-{"name": "sneakerbuzz-local-replica", "version": "1.0.0", "private": true, "type": "module", "engines": {"node": ">=24"}, "scripts": {"start": "node server.mjs", "dev": "node --watch server.mjs", "test": "node tests/api.mjs && node tests/reviews.mjs", "check": "node --check server.mjs && node --check reviews.mjs && node --check public/replica-client.js && node --check public/replica-bridge.js && node --check public/reviews.js", "test:reviews": "node tests/reviews.mjs"}}
+{
+  "name": "sneakerbuzz-local-replica",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "test": "node tests/api.mjs && node tests/reviews.mjs",
+    "check": "node --check server.mjs && node --check reviews.mjs && node --check public/replica-client.js && node --check public/replica-bridge.js && node --check public/reviews.js && node --check lib/store-db.mjs && node --check lib/store-routes.mjs && node --check lib/store-pages.mjs && node --check public/store.js && node --check lib/recommendations.mjs && node --check public/product-chat.js",
+    "test:reviews": "node tests/reviews.mjs",
+    "admin": "node scripts/grant-admin.mjs"
+  }
+}

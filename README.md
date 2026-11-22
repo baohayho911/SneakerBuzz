@@ -44,9 +44,7 @@ GET `/api/catalog?collection=/collections/vans&q=...&sort=price-asc&page=1`; l�
 
 POST `/cart/add.js`, `/cart/change.js`, `/cart/update.js`, `/cart/clear.js`; POST `/api/register`, `/api/login`, `/api/logout`, `/contact` (đăng ký nhận tin cục bộ).
 
-POST `/api/recover`, `/api/orders`, `/api/integration-disabled` trả 424 và nêu cấu hình còn thiếu. Chưa gửi thư khôi phục, chưa tạo đơn hàng hay giao dịch thanh toán. Không có trang quản trị bổ sung.
-
-Để hoàn thiện phần còn thiếu cần: ảnh/video hoặc quyền quan sát hợp lệ của checkout, giỏ hàng có hàng, trang tài khoản/đơn hàng; hợp đồng API và thông tin cấu hình nhà cung cấp email, đơn hàng, vận chuyển, thanh toán. Không gửi khóa bí mật trong mã nguồn hoặc báo cáo.
+GET/POST `/api/orders` xem và tạo đơn COD theo tài khoản. POST `/api/recover` và `/api/integration-disabled` trả 424 khi dịch vụ cần thiết chưa được cấu hình.
 
 Logo, ảnh, font và nội dung giữ nguồn công khai đã khảo sát; việc truy cập công khai không chứng minh quyền cấp phép tái xuất bản. Cần xác nhận quyền sử dụng của chủ sở hữu trước khi phát hành thương mại.
 
@@ -58,6 +56,27 @@ Khách hàng đã đăng nhập gửi đánh giá (1–5 sao, nội dung 10–10
 - `public/reviews.js`: giao diện trên trang sản phẩm, được `replica-client.js` nạp tự động. `public/admin/reviews.html`: trang kiểm duyệt.
 - `tests/reviews.mjs`: kiểm thử TC01–TC04 và các trường hợp bảo mật (`npm run test:reviews`; `npm test` chạy cả hai bộ).
 
-**Cấu hình quản trị viên:** đặt `ADMIN_EMAILS=email1,email2` (xem `.env.example`) rồi dùng `node --env-file=.env server.mjs`. Email phải là tài khoản đã đăng ký ở `/account/register`. Không có quản trị viên mặc định. Ảnh lưu ở `data/uploads/reviews/` (đổi bằng `REVIEW_UPLOAD_DIR`); thư mục này nằm trong `.gitignore`.
+Ảnh đánh giá lưu trong `data/uploads/reviews/`. Đổi thư mục qua `REVIEW_UPLOAD_DIR` nếu cần.
 
 API: GET `/api/reviews?handle=...&page=1` (công khai); POST `/api/reviews` (cần đăng nhập; JSON `{handle,rating,content,images:[dataURL]}`); GET/POST `/api/admin/reviews` (cần quản trị viên; POST `{id,action:hide|show|delete}`). Mọi kiểm tra hợp lệ (số sao, độ dài, định dạng ảnh theo chữ ký byte, dung lượng, trùng đánh giá, quyền quản trị) thực hiện ở máy chủ bằng truy vấn tham số hóa; nội dung người dùng được escape khi hiển thị.
+
+## Backend cửa hàng trên nhánh feature/store-backend
+
+1. Dùng Node.js 24 trở lên. Chạy `npm start` rồi mở http://127.0.0.1:8787.
+2. Đăng ký tài khoản tại `/account/register`. Sau khi đăng nhập, `/account` hiển thị hồ sơ và lịch sử đơn của chính tài khoản.
+3. Để cấp quyền admin, dùng terminal khác trong thư mục repo và chạy `npm run admin -- email-ban-da-dang-ky@example.com`. Dùng cùng đường dẫn `DATABASE_PATH` với máy chủ nếu đã thay đổi vị trí SQLite.
+4. Đăng nhập bằng tài khoản vừa cấp quyền và mở `/admin`. Có thể tìm, thêm, sửa, ẩn sản phẩm, quản lý biến thể/giá/SKU/tồn kho, gán danh mục có sẵn, khóa/mở thành viên, xử lý đơn, và vào `/admin/reviews` để kiểm duyệt.
+
+Quyền quản trị lưu theo ID trong SQLite. Thiết lập `ADMIN_EMAILS` của Sprint 2 đã được thay bằng lệnh cấp quyền ở trên. Hệ thống giữ tài khoản và đánh giá trong SQLite cũ khi chạy trên cùng cơ sở dữ liệu.
+
+Lần khởi động đầu nhập một lần 1.045 sản phẩm và biến thể từ `data/items.json`, đồng thời nạp danh mục từ `data/memberships.json`. Sau nhập, bảng SQLite là nguồn dữ liệu cho API và thay đổi quản trị. Khi sản phẩm được cập nhật, trang chi tiết dùng mẫu động; các khối giới thiệu cũ trên trang chủ vẫn là ảnh chụp giao diện. Dùng trang danh mục để xem danh sách mới nhất.
+
+Đơn COD lưu nội bộ, trừ tồn kho trong giao dịch SQLite và hoàn kho khi admin hủy đơn đang chờ hoặc đã xác nhận. Mức phí mẫu là 35.000₫ cho đơn dưới 999.000₫, miễn phí từ ngưỡng đó. Chưa kết nối hãng vận chuyển, cổng thanh toán hay gửi email khôi phục mật khẩu. Tồn kho ban đầu là dữ liệu khảo sát của repo, nên cần kiểm đếm trước khi vận hành thật.
+
+Chạy `npm run check` và `npm test` để kiểm tra. Sao lưu file SQLite và thư mục ảnh đánh giá định kỳ. Khi triển khai, gắn ổ lưu trữ bền vững cho SQLite và ảnh, chạy một tiến trình Node dùng cơ sở dữ liệu đó, cấu hình HTTPS qua reverse proxy và giữ khóa/bí mật bên ngoài Git.
+
+## Chatbot gợi ý sản phẩm
+
+Bấm **biểu tượng robot** ở góc dưới bên phải trang cửa hàng. Chat tự hiện lời chào và câu hỏi mẫu. Nút đóng ở đầu khung giữ lại hội thoại; **Kết thúc chat** xóa hội thoại và đóng khung. **Nhắn nhân viên qua Zalo** mở kênh liên hệ của cửa hàng. Ví dụ “giày Vans đen size 42 dưới 2 triệu”, “balo đen dưới 1 triệu” hoặc “giày từ 500k đến 1 triệu”. Chat hiển thị tối đa 5 thẻ, ưu tiên giá thấp, kèm ảnh, giá của biến thể khớp, size, màu và liên kết xem sản phẩm.
+
+Chatbot đọc danh mục hiện hành từ máy chủ, chỉ gợi ý sản phẩm đang hiển thị với biến thể còn hàng. Khi nhập nhiều tiêu chí, cùng một biến thể phải đáp ứng giá, size và màu. Nếu không tìm được, chatbot đề nghị đổi tiêu chí. Mỗi tin nhắn xử lý độc lập. Có thể ghép đầy đủ tiêu chí trong cùng câu. Tính năng nhận dạng theo từ khóa tiếng Việt, không cần khóa API AI, và sẽ bị giới hạn bởi dữ liệu màu/size/tên trong danh mục.

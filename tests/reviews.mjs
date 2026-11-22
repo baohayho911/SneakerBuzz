@@ -12,7 +12,7 @@ const port = 42000 + Math.floor(Math.random() * 10000), base = 'http://127.0.0.1
 const adminEmail = 'admin@example.invalid', password = 'TestOnly9876';
 const server = spawn(process.execPath, ['server.mjs'], {
   cwd: root,
-  env: {...process.env, PORT: String(port), DATABASE_PATH: path.join(temp, 'test.sqlite'), REVIEW_UPLOAD_DIR: path.join(temp, 'uploads', 'reviews'), ADMIN_EMAILS: adminEmail},
+  env: {...process.env, PORT: String(port), DATABASE_PATH: path.join(temp, 'test.sqlite'), REVIEW_UPLOAD_DIR: path.join(temp, 'uploads', 'reviews')},
   stdio: ['ignore', 'pipe', 'pipe']
 });
 let log = '';
@@ -57,6 +57,10 @@ try {
   await register(alice, 'alice@example.invalid', 'Alice');
   await register(bob, 'bob@example.invalid', 'Bob');
   await register(admin, adminEmail, 'Quan');
+  const grant = spawn(process.execPath, ['scripts/grant-admin.mjs', adminEmail], {
+    cwd: root, env: {...process.env, DATABASE_PATH: path.join(temp, 'test.sqlite')},
+  });
+  assert.equal(await new Promise(resolve => grant.once('exit', resolve)), 0);
 
   await test('Chưa có đánh giá: điểm trung bình bằng 0', async () => {
     const r = await anon.req(`/api/reviews?handle=${handle}`);

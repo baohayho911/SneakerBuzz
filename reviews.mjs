@@ -14,12 +14,6 @@ export const LIMITS = {
   maxBody: 9 * 1024 * 1024,       // 3 ảnh x 2 MB (base64) + nội dung
 };
 
-// Quản trị viên = tài khoản khách hàng có email nằm trong ADMIN_EMAILS (phân tách bằng dấu phẩy).
-// Không có quản trị viên mặc định: nếu không cấu hình thì không ai vào được trang kiểm duyệt.
-const adminEmails = new Set(
-  (process.env.ADMIN_EMAILS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
-);
-
 export function initReviews(db) {
   db.exec(`
     PRAGMA foreign_keys=ON;
@@ -104,7 +98,7 @@ function summary(db, handle) {
 function requireAdmin(ctx, req, res) {
   const c = ctx.customer(ctx.getSession(req, res));
   if (!c) throw ctx.bad('Vui lòng đăng nhập bằng tài khoản quản trị.', 401);
-  if (!adminEmails.has(String(c.email).toLowerCase())) throw ctx.bad('Tài khoản này không có quyền quản trị.', 403);
+  if (c.role !== 'admin') throw ctx.bad('Tài khoản này không có quyền quản trị.', 403);
   return c;
 }
 

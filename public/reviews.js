@@ -65,7 +65,7 @@
   root.id = 'product-reviews';
   root.setAttribute('aria-label', 'Đánh giá sản phẩm');
   root.innerHTML = '<h2>Đánh giá sản phẩm</h2><div class="rv-top"></div><div class="rv-form"></div><div class="rv-list"></div><button type="button" class="rv-btn rv-btn-ghost rv-more" hidden>Xem thêm đánh giá</button>';
-  const anchor = document.querySelector('.product-tab') || document.querySelector('.details-product') || document.querySelector('main') || document.body;
+  const anchor = document.querySelector('#review-anchor') || document.querySelector('.product-tab') || document.querySelector('.details-product') || document.querySelector('main') || document.body;
   anchor === document.body ? anchor.append(root) : anchor.after(root);
 
   const top = root.querySelector('.rv-top'), formBox = root.querySelector('.rv-form'), list = root.querySelector('.rv-list'), more = root.querySelector('.rv-more');

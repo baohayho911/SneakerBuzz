@@ -1,0 +1,18 @@
+*{box-sizing:border-box}
+body{margin:0;background:#f7f7f7;color:#1b1b1b;font:16px/1.55 system-ui,sans-serif}
+a{color:inherit;text-underline-offset:3px}
+.top{background:#171717;color:white}
+.top nav,.wrap{max-width:1120px;margin:auto;padding:16px}
+.top nav,.actions,.compact{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-weight:800;margin-right:auto;text-decoration:none}
+.panel{background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin:14px 0}
+.compact{justify-content:space-between}
+label{display:grid;gap:4px;margin:8px 0}
+input:not([type=checkbox]),select,textarea,button{max-width:100%;font:inherit;padding:8px;border-radius:5px;border:1px solid #aaa}
+button{background:#181818;color:#fff;cursor:pointer;margin:3px}
+button:disabled{opacity:.55;cursor:default}
+.variant{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;border:1px solid #ddd;margin:10px 0}
+.product-layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:24px;background:white;padding:20px}
+.product-image{width:100%;height:auto}
+.product-description{white-space:pre-line}
+[role=status]{color:#9a231c}
